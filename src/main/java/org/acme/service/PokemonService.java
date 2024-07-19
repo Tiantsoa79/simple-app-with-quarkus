@@ -30,13 +30,16 @@ public class PokemonService {
   public Uni<Pokemon> getPokemonById(String id) {
     return pokemonRestClient.getPokemonById(Integer.parseInt(id))
       .onItem().transformToUni(model -> {
+        //  check if a Pokemon exists in database
         return Pokemon.existsByName(model.name)
           .onItem().transformToUni(exists -> {
             if (!exists) {
+              // create and persist if not exists
               Pokemon pokemon = new Pokemon();
               pokemon.setName(model.name);
               return Panache.withTransaction(pokemon::persist).replaceWith(pokemon);
             } else {
+              // retrieve if exist
               return Pokemon.find("name", model.name).firstResult();
             }
           });
