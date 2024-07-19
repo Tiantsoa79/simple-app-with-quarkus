@@ -1,7 +1,7 @@
 package org.acme.model;
 
 import io.quarkus.hibernate.reactive.panache.PanacheEntity;
-import io.quarkus.hibernate.reactive.panache.PanacheEntityBase;
+
 import io.smallrye.mutiny.Uni;
 import jakarta.persistence.Entity;
 
@@ -23,8 +23,10 @@ public class Pokemon extends PanacheEntity {
     this.name = name;
   }
 
-  public static Uni<Pokemon> findByName(String name) {
-    return find("name", name).firstResult();
+  public static Uni<Boolean> existsByName(String name) {
+    return find("name", name).firstResult()
+      .onItem().ifNotNull().transform(entity -> true)
+      .onItem().ifNull().continueWith(false);
   }
 
 }

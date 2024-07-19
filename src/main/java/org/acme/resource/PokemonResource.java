@@ -19,16 +19,14 @@ public class PokemonResource {
 
   @GET
   @Path("/all")
-  public Uni<List<Pokemon>> get() {
+  public Uni<List<Pokemon>> getAll() {
     return pokemonService.getAllPokemon();
 
   }
 
   @GET
   @Path("/{id}")
-  public Uni<Pokemon> getPokemonById(@PathParam("id") String id) {
+  public Uni<Pokemon> getById(@PathParam("id") String id) {
     return pokemonService.getPokemonById(id);
   }
-
-
 }

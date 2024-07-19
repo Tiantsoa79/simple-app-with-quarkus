@@ -17,7 +17,7 @@ import java.util.List;
 
 @ApplicationScoped
 public class PokemonService {
-  @Inject
+
   @RestClient
   PokemonRestClient pokemonRestClient;
 
@@ -30,12 +30,18 @@ public class PokemonService {
   public Uni<Pokemon> getPokemonById(String id) {
     return pokemonRestClient.getPokemonById(Integer.parseInt(id))
       .onItem().transformToUni(model -> {
-
-        Pokemon pokemon = new Pokemon();
-        pokemon.setName(model.name);
-        return Panache.withTransaction(pokemon::persist).replaceWith(pokemon);
-
+        return Pokemon.existsByName(model.name)
+          .onItem().transformToUni(exists -> {
+            if (!exists) {
+              Pokemon pokemon = new Pokemon();
+              pokemon.setName(model.name);
+              return Panache.withTransaction(pokemon::persist).replaceWith(pokemon);
+            } else {
+              return Pokemon.find("name", model.name).firstResult();
+            }
+          });
       });
   }
+
 
 }
